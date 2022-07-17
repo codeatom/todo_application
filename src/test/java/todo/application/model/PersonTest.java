@@ -34,10 +34,6 @@ class PersonTest {
         String lastName = null;
         String email = "";
 
-        String objectFirstName = null;
-        String objectLastName = "";
-        String objectEmail = "";
-
         //Act
         Executable executable = () -> new Person(firstName, lastName, email);
 
