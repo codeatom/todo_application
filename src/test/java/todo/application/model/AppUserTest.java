@@ -12,7 +12,7 @@ class AppUserTest {
         String password = "passWord";
 
         //Act
-        AppUser appUser = new AppUser(username, password);
+        AppUser appUser = new AppUser(username, password, null);
 
         //Assert
         assertAll(
@@ -27,7 +27,7 @@ class AppUserTest {
         String username = "user_1";
 
         //Act
-        Executable executable = () -> new AppUser(null, null);
+        Executable executable = () -> new AppUser(null, null, null);
 
         //Assert
         assertThrows(IllegalArgumentException.class, executable);

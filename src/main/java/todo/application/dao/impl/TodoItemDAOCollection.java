@@ -1,6 +1,12 @@
 package todo.application.dao.impl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import todo.application.dao.TodoItemDAO;
+import todo.application.maintenance.SequencerDataSaver;
 import todo.application.model.TodoItem;
 import todo.application.sequencer.TodoItemIdSequencer;
 import java.time.LocalDate;
@@ -8,10 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TodoItemDAOCollection implements TodoItemDAO {
-    List<TodoItem> todoItemList;
+import static todo.application.maintenance.StaticResources.TODO_ITEM_FILE;
 
-    public TodoItemDAOCollection(List<TodoItem> todoItemList) {
+public class TodoItemDAOCollection implements TodoItemDAO {
+
+    private List<TodoItem> todoItemList = new ArrayList<>();
+
+
+    public void setTodoItemList(List<TodoItem> todoItemList) {
         this.todoItemList = todoItemList;
     }
 
@@ -28,6 +38,9 @@ public class TodoItemDAOCollection implements TodoItemDAO {
         todoItem.setId(TodoItemIdSequencer.nextId());
         todoItemList.add(todoItem);
 
+        SequencerDataSaver.saveSequencerValue();
+        saveAsJsonToFile();
+
         return todoItem;
     }
 
@@ -42,7 +55,7 @@ public class TodoItemDAOCollection implements TodoItemDAO {
 
     @Override
     public List<TodoItem> findAll() {
-        return new ArrayList<>(todoItemList);
+        return todoItemList;
     }
 
     @Override
@@ -62,6 +75,7 @@ public class TodoItemDAOCollection implements TodoItemDAO {
     @Override
     public List<TodoItem> findByPersonId(int id) {
         return todoItemList.stream()
+                .filter(t -> t.getCreator() != null)
                 .filter(t -> t.getCreator().getId() == id)
                 .collect(Collectors.toList());
     }
@@ -88,5 +102,28 @@ public class TodoItemDAOCollection implements TodoItemDAO {
             todoItemList.remove(todoItem);
         }
     }
-}
 
+
+    //Loads Collection Data From File
+    public void loadCollectionData(){
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            todoItemList = objectMapper.readValue(TODO_ITEM_FILE, new TypeReference<List<TodoItem>>() {});
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    //Saves Collection Data As JSON To File
+    public void saveAsJsonToFile(){
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectWriter objectWriter = objectMapper.writer(new DefaultPrettyPrinter());
+            objectWriter.writeValue(TODO_ITEM_FILE, todoItemList);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+}

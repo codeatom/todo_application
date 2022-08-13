@@ -1,5 +1,8 @@
 package todo.application.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Objects;
 
 public class TodoItemTask {
@@ -8,8 +11,17 @@ public class TodoItemTask {
     private TodoItem todoItem;
     private Person assignee;
 
-    public TodoItemTask(TodoItem todoItem) {
-        this.setTodoItem(todoItem);
+    public TodoItemTask() {
+    }
+
+    @JsonCreator
+    public TodoItemTask(@JsonProperty("todoItem") TodoItem todoItem,
+                        @JsonProperty("assignee") Person assignee,
+                        @JsonProperty("assigned") boolean assigned) {
+        setTodoItem(todoItem);
+        this.assignee = assignee;
+        this.assigned = assigned;
+        setAssigned(assignee);
     }
 
     public int getId() {
@@ -48,13 +60,6 @@ public class TodoItemTask {
 
     public void setAssignee(Person assignee) {
         this.assignee = assignee;
-    }
-
-    public String getSummary() {
-        return  "id: " + this.id +"\n"
-                + "todoItem: " + this.todoItem +"\n"
-                + "assignee: " + this.assignee +"\n"
-                + "assigned: " + this.assigned +"\n";
     }
 
     @Override

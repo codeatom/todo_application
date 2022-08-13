@@ -1,6 +1,12 @@
 package todo.application.dao.impl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import todo.application.dao.TodoItemTaskDAO;
+import todo.application.maintenance.SequencerDataSaver;
 import todo.application.model.TodoItemTask;
 import todo.application.sequencer.TodoItemTaskIdSequencer;
 
@@ -8,10 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TodoItemTaskDAOCollection implements TodoItemTaskDAO {
-    List<TodoItemTask> todoItemTaskList;
+import static todo.application.maintenance.StaticResources.TODO_ITEM_TASK_FILE;
 
-    public TodoItemTaskDAOCollection(List<TodoItemTask> todoItemTaskList) {
+public class TodoItemTaskDAOCollection implements TodoItemTaskDAO {
+
+    private List<TodoItemTask> todoItemTaskList = new ArrayList<>();
+
+
+    public void setTodoItemTaskList(List<TodoItemTask> todoItemTaskList) {
         this.todoItemTaskList = todoItemTaskList;
     }
 
@@ -28,6 +38,9 @@ public class TodoItemTaskDAOCollection implements TodoItemTaskDAO {
         todoItemTask.setId(TodoItemTaskIdSequencer.nextId());
         todoItemTaskList.add(todoItemTask);
 
+        SequencerDataSaver.saveSequencerValue();
+        saveAsJsonToFile();
+
         return todoItemTask;
     }
 
@@ -42,7 +55,7 @@ public class TodoItemTaskDAOCollection implements TodoItemTaskDAO {
 
     @Override
     public List<TodoItemTask> findAll() {
-        return new ArrayList<>(todoItemTaskList);
+        return todoItemTaskList;
     }
 
     @Override
@@ -55,6 +68,7 @@ public class TodoItemTaskDAOCollection implements TodoItemTaskDAO {
     @Override
     public List<TodoItemTask> findByPersonId(int id) {
         return todoItemTaskList.stream()
+                .filter(t -> t.getAssignee() != null)
                 .filter(t -> t.getAssignee().getId() == id)
                 .collect(Collectors.toList());
     }
@@ -67,4 +81,28 @@ public class TodoItemTaskDAOCollection implements TodoItemTaskDAO {
             todoItemTaskList.remove(todoItemTask);
         }
     }
+
+
+    //Loads Collection Data From File
+    public void loadCollectionData(){
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            todoItemTaskList = objectMapper.readValue(TODO_ITEM_TASK_FILE, new TypeReference<List<TodoItemTask>>() {});
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    //Saves Collection Data As JSON To File
+    public void saveAsJsonToFile(){
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectWriter objectWriter = objectMapper.writer(new DefaultPrettyPrinter());
+            objectWriter.writeValue(TODO_ITEM_TASK_FILE, todoItemTaskList);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
 }

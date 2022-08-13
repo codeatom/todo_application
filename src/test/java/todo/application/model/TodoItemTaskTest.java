@@ -11,11 +11,11 @@ class TodoItemTaskTest {
         //Arrange
         int id = 1;
         LocalDate todoDeadline = LocalDate.now();
-        TodoItem todoItem = new TodoItem("add test to assignment", "add test to array and string assignment", todoDeadline);
+        TodoItem todoItem = new TodoItem("add test to assignment", "add test to array and string assignment", false, null, todoDeadline);
         todoItem.setId(id);
 
         //Act
-        TodoItemTask todoItemTask = new TodoItemTask(todoItem);
+        TodoItemTask todoItemTask = new TodoItemTask(todoItem, null, false);
         todoItemTask.setId(id);
 
         //Assert
@@ -33,7 +33,7 @@ class TodoItemTaskTest {
         TodoItem todoItem = null;
 
         //Act
-        Executable executable = () -> new TodoItemTask(todoItem);
+        Executable executable = () -> new TodoItemTask(todoItem, null, false);
 
         //Assert
         assertThrows(IllegalArgumentException.class, executable);

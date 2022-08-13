@@ -1,6 +1,8 @@
 package todo.application.model;
 
 import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 import todo.application.util.Validation;
 
 public class AppUser {
@@ -8,9 +10,15 @@ public class AppUser {
     private String password;
     AppRole role;
 
-    public AppUser(String username, String password) {
+    public AppUser() {
+    }
+
+    public AppUser(@JsonProperty("username") String username,
+                   @JsonProperty("password") String password,
+                   @JsonProperty("role") AppRole role) {
         this.setUsername(username);
         this.setPassword(password);
+        this.role = role;
     }
 
     public String getUsername() {

@@ -2,19 +2,37 @@ package todo.application.model;
 
 import java.time.LocalDate;
 import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import todo.application.util.Validation;
 
 public class TodoItem {
     private int id;
     private String title;
     private String taskDescription;
-    private LocalDate deadLine;
     private boolean done;
     private Person creator;
 
-    public TodoItem(String title, String taskDescription, LocalDate deadLine) {
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
+    private LocalDate deadLine;
+
+    public TodoItem() {
+    }
+
+    public TodoItem(@JsonProperty("title") String title,
+                    @JsonProperty("taskDescription") String taskDescription,
+                    @JsonProperty("done") boolean done,
+                    @JsonProperty("creator") Person creator,
+                    @JsonProperty("deadLine") LocalDate deadLine) {
         this.setTitle(title);
         this.taskDescription = taskDescription;
+        this.done = done;
+        this.creator = creator;
         this.setDeadLine(deadLine);
     }
 
@@ -78,15 +96,6 @@ public class TodoItem {
     public boolean isOverdue(){
         LocalDate date = LocalDate.now();
         return date.isAfter(deadLine);
-    }
-
-    public String getSummary() {
-        return  "id: " + this.id +"\n"
-                + "creator: " + this.creator +"\n"
-                + "title: " + this.title +"\n"
-                + "taskDescription: " + this.taskDescription +"\n"
-                + "deadline: " + this.deadLine +"\n"
-                + "done: " + this.done +"\n";
     }
 
     @Override

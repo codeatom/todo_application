@@ -1,19 +1,37 @@
 package todo.application.dao.impl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import todo.application.dao.PersonDAO;
+import todo.application.maintenance.SequencerDataSaver;
 import todo.application.model.Person;
 import todo.application.sequencer.PersonIdSequencer;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PersonDAOCollection implements PersonDAO {
-    List<Person> personList;
-    List<String> emailList;
+import static todo.application.maintenance.StaticResources.EMAIL_FILE;
+import static todo.application.maintenance.StaticResources.PERSON_FILE;
 
-    public PersonDAOCollection() {
-        this.personList = new ArrayList<>();
-        this.emailList = new ArrayList<>();
+public class PersonDAOCollection implements PersonDAO {
+
+    private List<Person> personList = new ArrayList<>();
+    private List<String> emailList = new ArrayList<>();
+
+
+    public void setPersonList(List<Person> personList) {
+        this.personList = personList;
+    }
+
+    public List<String> getEmailList() {
+        return emailList;
+    }
+
+    public void setEmailList(List<String> emailList) {
+        this.emailList = emailList;
     }
 
     @Override
@@ -30,7 +48,10 @@ public class PersonDAOCollection implements PersonDAO {
         emailList.add(person.getEmail());
         personList.add(person);
 
-        return null;
+        SequencerDataSaver.saveSequencerValue();
+        saveAsJsonToFile();
+
+        return person;
     }
 
     @Override
@@ -54,7 +75,7 @@ public class PersonDAOCollection implements PersonDAO {
 
     @Override
     public List<Person> findAll() {
-        return new ArrayList<>(personList);
+        return personList;
     }
 
     @Override
@@ -66,4 +87,30 @@ public class PersonDAOCollection implements PersonDAO {
             personList.remove(person);
         }
     }
+
+
+    //Loads Collection Data From File
+    public void loadCollectionData(){
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            personList = objectMapper.readValue(PERSON_FILE, new TypeReference<List<Person>>() {});
+            emailList = objectMapper.readValue(EMAIL_FILE, new TypeReference<List<String>>() {});
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    //Saves Collection Data As JSON To File
+    public void saveAsJsonToFile(){
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectWriter objectWriter = objectMapper.writer(new DefaultPrettyPrinter());
+            objectWriter.writeValue(PERSON_FILE, personList);
+            objectWriter.writeValue(EMAIL_FILE, emailList);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
 }

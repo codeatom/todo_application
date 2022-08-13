@@ -14,7 +14,7 @@ class PersonTest {
         String email = "co@provider.com";
 
         //Act
-        Person person = new Person(firstName, lastName, email);
+        Person person = new Person(firstName, lastName, email, null);
         person.setId(id);
 
         //Assert
@@ -35,7 +35,7 @@ class PersonTest {
         String email = "";
 
         //Act
-        Executable executable = () -> new Person(firstName, lastName, email);
+        Executable executable = () -> new Person(firstName, lastName, email, null);
 
         //Assert
         assertThrows(IllegalArgumentException.class, executable);

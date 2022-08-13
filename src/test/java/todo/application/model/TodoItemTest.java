@@ -15,7 +15,7 @@ class TodoItemTest {
         LocalDate localDate = LocalDate.now().plusDays(7);
 
         //Act
-        TodoItem todoItem = new TodoItem(title, taskDescription, localDate);
+        TodoItem todoItem = new TodoItem(title, taskDescription, false, null, localDate);
         todoItem.setId(id);
 
         //Assert
@@ -36,7 +36,7 @@ class TodoItemTest {
         LocalDate localDate = null;
 
         //Act
-        Executable executable = () -> new TodoItem(title, taskDescription, localDate);
+        Executable executable = () -> new TodoItem(title, taskDescription, false, null, localDate);
 
         //Assert
         assertThrows(IllegalArgumentException.class, executable);

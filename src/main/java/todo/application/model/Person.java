@@ -1,5 +1,7 @@
 package todo.application.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import todo.application.util.Validation;
 import java.util.Objects;
 
@@ -10,10 +12,18 @@ public class Person {
     private String email;
     private AppUser credentials;
 
-    public Person(String firstName, String lastName, String email) {
+    public Person() {
+    }
+
+    @JsonCreator
+    public Person(@JsonProperty("firstName") String firstName,
+                  @JsonProperty("lastName") String lastName,
+                  @JsonProperty("email") String email,
+                  @JsonProperty("credentials") AppUser credentials) {
         this.setFirstName(firstName);
         this.setLastName(lastName);
         this.setEmail(email);
+        this.credentials = credentials;
     }
 
     public int getId() {
@@ -55,7 +65,7 @@ public class Person {
     }
 
     public void setEmail(String email) {
-        if (Validation.isValid("email", email, 3, 15)) {
+        if (Validation.isValid("email", email, 3, 30)) {
             this.email = email;
         }
     }
@@ -66,13 +76,6 @@ public class Person {
 
     public void setCredentials(AppUser credentials) {
         this.credentials = credentials;
-    }
-
-    public String getSummary() {
-        return  "id: " + this.id +"\n"
-                + "First Name: " + this.firstName +"\n"
-                + "Last Name: " + this.lastName +"\n"
-                + "email: " + this.email +"\n";
     }
 
     @Override

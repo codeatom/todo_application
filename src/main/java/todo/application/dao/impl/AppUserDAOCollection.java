@@ -1,18 +1,35 @@
 package todo.application.dao.impl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import todo.application.dao.AppUserDAO;
 import todo.application.model.AppUser;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class AppUserDAOCollection implements AppUserDAO {
-    List<AppUser> appUserList;
-    List<String> userNameList;
+import static todo.application.maintenance.StaticResources.APP_USER_FILE;
+import static todo.application.maintenance.StaticResources.APP_USER_NAME_FILE;
 
-    public AppUserDAOCollection() {
-        this.appUserList = new ArrayList<>();
-        this.userNameList = new ArrayList<>();
+public class AppUserDAOCollection implements AppUserDAO {
+
+    private List<AppUser> appUserList = new ArrayList<>();
+    private List<String> userNameList = new ArrayList<>();
+
+
+    public void setAppUserList(List<AppUser> appUserList) {
+        this.appUserList = appUserList;
+    }
+
+    public List<String> getUserNameList() {
+        return userNameList;
+    }
+
+    public void setUserNameList(List<String> userNameList) {
+        this.userNameList = userNameList;
     }
 
     @Override
@@ -27,6 +44,9 @@ public class AppUserDAOCollection implements AppUserDAO {
 
         appUserList.add(appUser);
         userNameList.add(appUser.getUsername());
+
+        saveAsJsonToFile();
+
         return appUser;
     }
 
@@ -41,7 +61,7 @@ public class AppUserDAOCollection implements AppUserDAO {
 
     @Override
     public List<AppUser> findAll() {
-        return new ArrayList<>(appUserList);
+        return appUserList;
     }
 
     @Override
@@ -53,4 +73,31 @@ public class AppUserDAOCollection implements AppUserDAO {
             appUserList.remove(appUser);
         }
     }
+
+
+    //Loads Collection Data From File
+    public void loadCollectionData(){
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            appUserList = objectMapper.readValue(APP_USER_FILE, new TypeReference<List<AppUser>>() {});
+            userNameList = objectMapper.readValue(APP_USER_NAME_FILE, new TypeReference<List<String>>() {});
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    //Saves Collection Data As JSON To File
+    public void saveAsJsonToFile(){
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectWriter objectWriter = objectMapper.writer(new DefaultPrettyPrinter());
+            objectWriter.writeValue(APP_USER_FILE, appUserList);
+            objectWriter.writeValue(APP_USER_NAME_FILE, userNameList);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
 }
+
