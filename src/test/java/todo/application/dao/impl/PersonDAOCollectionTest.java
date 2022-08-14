@@ -32,7 +32,7 @@ class PersonDAOCollectionTest {
         //Arrange
 
         //Act
-        //------persist was done in setup------//
+         //------persist was done in setup------//
 
         //Assert
         assertAll(
@@ -77,17 +77,17 @@ class PersonDAOCollectionTest {
     }
 
     @Test
-    void should_Remove_A_AppUser_From_Person_List() {
+    void should_Remove_A_Person_From_Person_List() {
         //Arrange
 
         //Act
-        List<Person> appUserList = new ArrayList<>();
-        appUserList.add(person_1);
+        List<Person> personList = new ArrayList<>();
+        personList.add(person_1);
 
         personDAOCollection.remove(person_2.getId());
 
         //Assert
-        assertEquals(appUserList, personDAOCollection.findAll());
+        assertEquals(personList, personDAOCollection.findAll());
     }
 
 }
